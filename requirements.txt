@@ -1,0 +1,12 @@
+flask
+gunicorn
+flask_sqlalchemy
+flask_bcrypt
+flask_login
+PyJWT
+requests
+python-dotenv
+
+
+
+
