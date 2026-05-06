@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFGlory - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0c12;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px; left: 50%; transform: translateX(-50%);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(200,169,110,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .auth-card {
+            background: #13151f;
+            border: 1px solid #1e2130;
+            border-radius: 28px;
+            width: 100%;
+            max-width: 420px;
+            padding: 2.5rem 2rem 2rem;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            animation: fadeUp 0.4s ease;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .logo-icon {
+            width: 72px; height: 72px;
+            background: #c8a96e;
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 24px rgba(200,169,110,0.3);
+        }
+        .logo-icon i { font-size: 2rem; color: #fff; }
+        .auth-title { text-align: center; margin-bottom: 1.8rem; }
+        .auth-title h1 { font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem; }
+        .auth-title p { color: #6b7280; font-size: 0.92rem; }
+        .auth-title p strong { font-weight: 700; }
+        .highlight-gold { color: #c8a96e; }
+        .highlight-green { color: #22c55e; }
+        .tab-switcher {
+            display: flex;
+            background: #1a1d28;
+            border-radius: 16px;
+            padding: 5px;
+            margin-bottom: 1.8rem;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 0.78rem 1rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.97rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: transparent;
+            color: #6b7280;
+            font-family: inherit;
+        }
+        .tab-btn.signin-active { background: #c8a96e; color: #1a1507; }
+        .tab-btn.signup-active { background: #22c55e; color: #fff; }
+        .form-panel { display: none; }
+        .form-panel.active { display: block; animation: fadeUp 0.3s ease; }
+        .open-reg-banner {
+            background: #0d2318;
+            border: 1.5px solid rgba(34,197,94,0.3);
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .open-reg-banner .title {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px;
+            font-size: 1rem; font-weight: 700; color: #22c55e;
+            margin-bottom: 0.3rem;
+        }
+        .open-reg-banner p { font-size: 0.8rem; color: #4ade80; }
+        .field-label { display: block; font-size: 0.92rem; font-weight: 600; color: #e5e7eb; margin-bottom: 0.5rem; }
+        .field-hint { font-size: 0.75rem; color: #4b5563; margin-top: 0.35rem; margin-bottom: 1.2rem; }
+        .input-wrap { position: relative; margin-bottom: 1.25rem; }
+        .input-wrap .field-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #4b5563; font-size: 1rem; }
+        .input-wrap input {
+            width: 100%;
+            padding: 0.95rem 1rem 0.95rem 3rem;
+            background: #1a1d28;
+            border: 1px solid #2a2e40;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            color: #e5e7eb;
+            font-family: inherit;
+            transition: all 0.25s;
+            outline: none;
+        }
+        .input-wrap input::placeholder { color: #4b5563; }
+        #signinForm .input-wrap input:focus { border-color: #c8a96e; box-shadow: 0 0 0 3px rgba(200,169,110,0.15); }
+        #signupForm .input-wrap input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px;
+            margin-top: 0.4rem;
+            font-family: inherit;
+            background: #c8a96e; color: #1a1507;
+        }
+        .btn-submit:hover { background: #b8965a; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(200,169,110,0.3); }
+        .alert { padding: 0.8rem 1rem; border-radius: 12px; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+        .alert.error { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; display: block; }
+        .alert.success { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; display: block; }
+        .spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 480px) { .auth-card { padding: 1.8rem 1.4rem 1.4rem; } .auth-title h1 { font-size: 1.7rem; } }
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+
+    <div class="auth-title" id="title-signin">
+        <h1>Welcome Back</h1>
+        <p>Sign in to <strong class="highlight-gold">FFGlory</strong> panel</p>
+    </div>
+    <div class="auth-title" id="title-signup" style="display:none;">
+        <h1>Create Account</h1>
+        <p>Join <strong class="highlight-green">FFGlory</strong> panel</p>
+    </div>
+
+    <div class="tab-switcher">
+        <button class="tab-btn signin-active" id="tab-signin" onclick="showTab('signin')">Sign In</button>
+        <button class="tab-btn" id="tab-signup" onclick="showTab('signup')" style="color:#6b7280;">Sign Up</button>
+    </div>
+
+    <!-- SIGN IN -->
+    <div class="form-panel active" id="signinForm">
+        <div class="alert" id="loginAlert"></div>
+        <label class="field-label">Username</label>
+        <div class="input-wrap">
+            <i class="fas fa-user field-icon"></i>
+            <input type="text" id="loginEmail" placeholder="Enter your username" autocomplete="username">
+        </div>
+        <label class="field-label">Password</label>
+        <div class="input-wrap" style="margin-bottom:1.5rem;">
+            <i class="fas fa-lock field-icon"></i>
+            <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+        </div>
+        <button class="btn-submit" onclick="doLogin()">
+            <span class="spinner" id="login-spinner"></span>
+            <i class="fas fa-sign-in-alt" id="login-icon"></i>
+            <span id="login-text">Sign In</span>
+        </button>
+    </div>
+
+    <!-- SIGN UP -->
+    <div class="form-panel" id="signupForm">
+        <div class="alert" id="signupAlert"></div>
+        <div class="open-reg-banner">
+            <div class="title"><i class="fas fa-check-circle"></i> Open Registration</div>
+            <p>No invitation code required - create your account now!</p>
+        </div>
+        <label class="field-label">Username</label>
+        <div class="input-wrap">
+            <i class="fas fa-user field-icon"></i>
+            <input type="text" id="signupUsername" placeholder="choose a username" autocomplete="username">
+        </div>
+        <p class="field-hint">Lowercase letters, numbers, and underscore only</p>
+        <label class="field-label">Password</label>
+        <div class="input-wrap">
+            <i class="fas fa-lock field-icon"></i>
+            <input type="password" id="signupPassword" placeholder="Create a password" autocomplete="new-password">
+        </div>
+        <p class="field-hint">Minimum 6 characters</p>
+        <label class="field-label">Confirm Password</label>
+        <div class="input-wrap" style="margin-bottom:1.5rem;">
+            <i class="fas fa-shield-alt field-icon"></i>
+            <input type="password" id="signupConfirm" placeholder="Confirm your password" autocomplete="new-password">
+        </div>
+        <button class="btn-submit" onclick="doSignup()">
+            <span class="spinner" id="signup-spinner"></span>
+            <i class="fas fa-user-plus" id="signup-icon"></i>
+            <span id="signup-text">Create Account</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    function showTab(tab) {
+        const isSignin = tab === 'signin';
+        document.getElementById('title-signin').style.display = isSignin ? 'block' : 'none';
+        document.getElementById('title-signup').style.display = isSignin ? 'none' : 'block';
+        document.getElementById('signinForm').classList.toggle('active', isSignin);
+        document.getElementById('signupForm').classList.toggle('active', !isSignin);
+        const s = document.getElementById('tab-signin'), u = document.getElementById('tab-signup');
+        if (isSignin) { s.className = 'tab-btn signin-active'; s.style.color = ''; u.className = 'tab-btn'; u.style.color = '#6b7280'; }
+        else { u.className = 'tab-btn signup-active'; u.style.color = ''; s.className = 'tab-btn'; s.style.color = '#6b7280'; }
+    }
+
+    async function doLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const alertBox = document.getElementById('loginAlert');
+        const spinner = document.getElementById('login-spinner');
+        const icon = document.getElementById('login-icon');
+        const text = document.getElementById('login-text');
+        if (!email || !password) { alertBox.textContent = 'Please fill in all fields'; alertBox.className = 'alert error'; setTimeout(() => alertBox.className = 'alert', 3000); return; }
+        spinner.style.display = 'block'; icon.style.display = 'none'; text.textContent = 'Signing in...';
+        try {
+            const res = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alertBox.textContent = '✅ Login successful! Redirecting...'; alertBox.className = 'alert success';
+                setTimeout(() => window.location.href = '/home', 1200);
+            } else {
+                alertBox.textContent = data.error || 'Login failed'; alertBox.className = 'alert error';
+                setTimeout(() => alertBox.className = 'alert', 3000);
+                spinner.style.display = 'none'; icon.style.display = 'inline'; text.textContent = 'Sign In';
+            }
+        } catch { alertBox.textContent = 'Network error. Please try again.'; alertBox.className = 'alert error'; setTimeout(() => alertBox.className = 'alert', 3000); spinner.style.display = 'none'; icon.style.display = 'inline'; text.textContent = 'Sign In'; }
+    }
+
+    async function doSignup() {
+        const username = document.getElementById('signupUsername').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const confirm  = document.getElementById('signupConfirm').value;
+        const alertBox = document.getElementById('signupAlert');
+        const spinner  = document.getElementById('signup-spinner');
+        const icon     = document.getElementById('signup-icon');
+        const text     = document.getElementById('signup-text');
+        if (!username || !password || !confirm) { alertBox.textContent = 'Please fill in all fields'; alertBox.className = 'alert error'; setTimeout(() => alertBox.className = 'alert', 3000); return; }
+        if (password !== confirm) { alertBox.textContent = 'Passwords do not match'; alertBox.className = 'alert error'; setTimeout(() => alertBox.className = 'alert', 3000); return; }
+        if (password.length < 6) { alertBox.textContent = 'Password must be at least 6 characters'; alertBox.className = 'alert error'; setTimeout(() => alertBox.className = 'alert', 3000); return; }
+        spinner.style.display = 'block'; icon.style.display = 'none'; text.textContent = 'Creating...';
+        try {
+            const res = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alertBox.textContent = '✅ Account created! Sign in now...'; alertBox.className = 'alert success';
+                setTimeout(() => { document.getElementById('loginEmail').value = username; showTab('signin'); alertBox.className = 'alert'; }, 1800);
+            } else { alertBox.textContent = data.error || 'Registration failed'; alertBox.className = 'alert error'; setTimeout(() => alertBox.className = 'alert', 3000); }
+        } catch { alertBox.textContent = 'Network error. Please try again.'; alertBox.className = 'alert error'; setTimeout(() => alertBox.className = 'alert', 3000); }
+        finally { spinner.style.display = 'none'; icon.style.display = 'inline'; text.textContent = 'Create Account'; }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        const active = document.querySelector('.form-panel.active');
+        if (active.id === 'signinForm') doLogin(); else doSignup();
+    });
+</script>
+</body>
+</html>
