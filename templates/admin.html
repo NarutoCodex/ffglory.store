@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#0a0c15; color:#e2e8f0; min-height:100vh; }
+        /* TABS */
+        .tab { display:none; }
+        .tab.active { display:block; }
+        /* CARD */
+        .card { background:#0f111a; border:1px solid #1e2130; border-radius:16px; padding:20px; margin-bottom:16px; }
+        /* STAT */
+        .stat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px; }
+        .stat-box { background:#0f111a; border:1px solid #1e2130; border-radius:14px; padding:16px; }
+        .stat-label { font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+        .stat-val { font-size:28px; font-weight:800; color:#fff; }
+        .stat-val.blue { color:#60a5fa; }
+        .stat-val.green { color:#34d399; }
+        .stat-val.amber { color:#fbbf24; }
+        .stat-val.purple { color:#a78bfa; }
+        /* NAV */
+        nav { background:#0f111a; border-bottom:1px solid #1e2130; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+        .nav-logo { display:flex; align-items:center; gap:10px; }
+        .nav-icon { width:36px; height:36px; background:linear-gradient(135deg,#7c3aed,#6d28d9); border-radius:10px; display:flex; align-items:center; justify-content:center; }
+        .nav-title { font-weight:800; font-size:18px; background:linear-gradient(135deg,#a78bfa,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .nav-right { display:flex; align-items:center; gap:8px; }
+        .badge { background:#1e2130; border:1px solid #2a2e40; border-radius:20px; padding:6px 12px; font-size:12px; color:#93c5fd; display:flex; align-items:center; gap:6px; }
+        .btn-logout { background:transparent; border:1px solid #2a2e40; border-radius:10px; padding:6px 14px; color:#9ca3af; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px; font-family:inherit; }
+        .btn-logout:hover { color:#fff; border-color:#4b5563; }
+        /* BOTTOM NAV */
+        .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:#0f111a; border-top:1px solid #1e2130; display:flex; z-index:50; }
+        .bn-btn { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 4px 8px; background:none; border:none; color:#6b7280; font-size:9px; font-family:inherit; cursor:pointer; gap:4px; }
+        .bn-btn i { font-size:18px; }
+        .bn-btn.active { color:#3b82f6; }
+        /* CONTENT */
+        .content { padding:16px; padding-bottom:80px; }
+        /* TABLE */
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        th { text-align:left; padding:8px 6px; color:#6b7280; font-weight:500; border-bottom:1px solid #1e2130; font-size:11px; }
+        td { padding:10px 6px; border-bottom:1px solid #111827; vertical-align:middle; }
+        tr:hover td { background:rgba(255,255,255,.02); }
+        /* FORM */
+        .label { display:block; font-size:12px; color:#9ca3af; margin-bottom:6px; }
+        input, textarea, select { width:100%; background:#151821; border:1px solid #2a2e40; border-radius:10px; padding:10px 14px; color:#e2e8f0; font-size:14px; font-family:inherit; outline:none; }
+        input:focus, textarea:focus { border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59,130,246,.15); }
+        textarea { resize:vertical; }
+        /* BUTTONS */
+        .btn { border:none; border-radius:10px; padding:10px 16px; font-weight:600; font-size:13px; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; transition:all .2s; }
+        .btn-primary { background:#3b82f6; color:#fff; }
+        .btn-primary:hover { background:#2563eb; }
+        .btn-success { background:linear-gradient(135deg,#10b981,#059669); color:#fff; }
+        .btn-success:hover { opacity:.9; }
+        .btn-danger { background:rgba(239,68,68,.1); color:#f87171; border:1px solid rgba(239,68,68,.3); }
+        .btn-warning { background:rgba(245,158,11,.1); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
+        .btn-amber { background:#f59e0b; color:#1a1507; }
+        .btn-full { width:100%; justify-content:center; }
+        .btn:disabled { opacity:.6; cursor:not-allowed; }
+        /* BADGE */
+        .chip { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500; }
+        .chip-yellow { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
+        .chip-green { background:rgba(16,185,129,.15); color:#34d399; border:1px solid rgba(16,185,129,.3); }
+        .chip-red { background:rgba(239,68,68,.15); color:#f87171; border:1px solid rgba(239,68,68,.3); }
+        .chip-blue { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
+        /* MODAL */
+        .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:100; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(4px); }
+        .modal.open { display:flex; }
+        .modal-box { background:#0f111a; border:1px solid #1e2130; border-radius:20px; padding:24px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; }
+        .modal-title { font-size:18px; font-weight:700; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+        .modal-close { background:none; border:none; color:#6b7280; font-size:22px; cursor:pointer; }
+        /* OFFER */
+        .offer-preview { background:#0d0f1a; border:1.5px solid rgba(245,158,11,.3); border-radius:14px; padding:16px; margin-top:8px; }
+        /* SECTION TITLE */
+        .section-title { display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700; margin-bottom:16px; }
+        .section-icon { width:32px; height:32px; background:rgba(59,130,246,.1); border-radius:10px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(59,130,246,.2); font-size:14px; }
+        /* TOAST */
+        #toast-wrap { position:fixed; bottom:72px; right:12px; z-index:200; display:flex; flex-direction:column; gap:8px; }
+        .toast { padding:10px 16px; border-radius:12px; font-size:13px; display:flex; align-items:center; gap:8px; animation:slideIn .3s ease; backdrop-filter:blur(8px); }
+        .toast-success { background:rgba(16,185,129,.2); border:1px solid rgba(16,185,129,.3); color:#34d399; }
+        .toast-error { background:rgba(239,68,68,.2); border:1px solid rgba(239,68,68,.3); color:#f87171; }
+        .toast-info { background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.3); color:#60a5fa; }
+        @keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        /* SWITCH */
+        .switch { position:relative; display:inline-block; width:44px; height:22px; }
+        .switch input { opacity:0; width:0; height:0; }
+        .slider { position:absolute; cursor:pointer; inset:0; background:#334155; border-radius:22px; transition:.3s; }
+        .slider:before { position:absolute; content:""; height:16px; width:16px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
+        input:checked + .slider { background:#10b981; }
+        input:checked + .slider:before { transform:translateX(22px); }
+        .row { display:grid; gap:12px; }
+        .row-2 { grid-template-columns:1fr 1fr; }
+        .row-3 { grid-template-columns:1fr 1fr 1fr; }
+        .mb { margin-bottom:12px; }
+        .mt { margin-top:12px; }
+        .overflow-x { overflow-x:auto; }
+        .text-xs { font-size:11px; }
+        .text-sm { font-size:13px; }
+        .text-muted { color:#6b7280; }
+        .text-green { color:#34d399; }
+        .text-blue { color:#60a5fa; }
+        .text-amber { color:#fbbf24; }
+        .text-red { color:#f87171; }
+        .text-white { color:#fff; }
+        .text-cyan { color:#22d3ee; }
+        .font-bold { font-weight:700; }
+        .font-mono { font-family:monospace; }
+        .flex { display:flex; }
+        .items-center { align-items:center; }
+        .justify-between { justify-content:space-between; }
+        .gap { gap:8px; }
+        .gap-sm { gap:4px; }
+        .flex-1 { flex:1; }
+        .empty { text-align:center; padding:40px 0; color:#6b7280; }
+        .empty i { font-size:36px; margin-bottom:8px; display:block; opacity:.4; }
+        .progress-bar { height:6px; background:#1e2130; border-radius:6px; overflow:hidden; width:80px; display:inline-block; vertical-align:middle; }
+        .progress-fill { height:100%; background:#f59e0b; border-radius:6px; }
+        img.thumb { width:44px; height:44px; border-radius:8px; object-fit:cover; cursor:pointer; border:2px solid rgba(34,211,238,.2); }
+        .status-box { border-radius:12px; padding:16px; text-align:center; margin-bottom:12px; border:1px solid #2a2e40; background:#151821; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-logo">
+        <div class="nav-icon"><i class="fas fa-shield-alt" style="color:#fff;font-size:16px;"></i></div>
+        <span class="nav-title">Admin Panel</span>
+    </div>
+    <div class="nav-right">
+        <div class="badge" id="admin-badge" style="display:none;"><i class="fas fa-user-cog"></i><span id="admin-name">Admin</span></div>
+        <button class="btn-logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+</nav>
+
+<div class="content">
+    <!-- DASHBOARD TAB -->
+    <div id="tab-dashboard" class="tab active">
+        <div class="stat-grid">
+            <div class="stat-box"><div class="stat-label">Total Users</div><div class="stat-val blue" id="s-users">—</div></div>
+            <div class="stat-box"><div class="stat-label">Active Bots</div><div class="stat-val green" id="s-bots">—</div></div>
+            <div class="stat-box"><div class="stat-label">Total Glory</div><div class="stat-val amber" id="s-glory">—</div></div>
+            <div class="stat-box"><div class="stat-label">Pending Orders</div><div class="stat-val amber" id="s-orders">—</div></div>
+            <div class="stat-box" style="cursor:pointer;" onclick="showTab('transactions')">
+                <div class="stat-label">Pending Payments</div><div class="stat-val purple" id="s-payments">—</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLORY TAB -->
+    <div id="tab-glory" class="tab">
+        <div class="card">
+            <div class="section-title"><div class="section-icon" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);"><i class="fas fa-trophy" style="color:#fbbf24;"></i></div>Active Bot Instances<button onclick="loadGlory()" class="btn btn-primary" style="margin-left:auto;padding:6px 12px;font-size:12px;"><i class="fas fa-sync-alt"></i></button></div>
+            <div id="glory-list"><div class="empty"><i class="fas fa-robot"></i>No active bots</div></div>
+        </div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div id="tab-orders" class="tab">
+        <div class="card">
+            <div class="section-title"><div class="section-icon"><i class="fas fa-shopping-cart text-amber"></i></div>New Orders<button onclick="loadOrders()" class="btn btn-primary" style="margin-left:auto;padding:6px 12px;font-size:12px;"><i class="fas fa-sync-alt"></i></button></div>
+            <div id="orders-list"><div class="empty"><i class="fas fa-inbox"></i>No pending orders</div></div>
+        </div>
+    </div>
+
+    <!-- PAYMENTS TAB -->
+    <div id="tab-transactions" class="tab">
+        <div class="card">
+            <div class="section-title"><div class="section-icon"><i class="fas fa-receipt text-blue"></i></div>Transactions<button onclick="loadTransactions()" class="btn btn-primary" style="margin-left:auto;padding:6px 12px;font-size:12px;"><i class="fas fa-sync-alt"></i></button></div>
+            <div class="overflow-x"><table>
+                <thead><tr><th>#</th><th>User</th><th>Amount</th><th>Credits</th><th>UTR</th><th>Screenshot</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="tx-list"><tr><td colspan="8" class="empty">No transactions</td></tr></tbody>
+            </table></div>
+        </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="tab-users" class="tab">
+        <div class="card">
+            <div class="section-title"><div class="section-icon"><i class="fas fa-users text-blue"></i></div>All Users<button onclick="loadUsers()" class="btn btn-primary" style="margin-left:auto;padding:6px 12px;font-size:12px;"><i class="fas fa-sync-alt"></i></button></div>
+            <div class="overflow-x"><table>
+                <thead><tr><th>ID</th><th>Username</th><th>Basic</th><th>Premium</th><th>Role</th><th>Edit</th></tr></thead>
+                <tbody id="users-list"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody>
+            </table></div>
+        </div>
+    </div>
+
+    <!-- COUPON TAB -->
+    <div id="tab-coupon" class="tab">
+        <div class="card">
+            <div class="section-title"><div class="section-icon"><i class="fas fa-ticket-alt text-blue"></i></div>Generate Coupon</div>
+            <div class="row row-2 mb">
+                <div><label class="label">Basic Credits</label><input type="number" id="cp-basic" value="0" min="0"></div>
+                <div><label class="label">Premium Credits</label><input type="number" id="cp-premium" value="0" min="0"></div>
+            </div>
+            <button class="btn btn-success btn-full" onclick="genCoupon()"><i class="fas fa-plus-circle"></i> Generate Code</button>
+            <div id="coupon-result" style="display:none;margin-top:12px;background:#151821;border:1px solid #2a2e40;border-radius:12px;padding:16px;text-align:center;">
+                <div class="text-xs text-muted mb">Generated Code</div>
+                <code id="coupon-code" style="font-size:20px;font-weight:700;color:#60a5fa;font-family:monospace;"></code>
+                <button onclick="navigator.clipboard.writeText(document.getElementById('coupon-code').textContent).then(()=>toast('Copied!','success'))" class="btn btn-primary" style="margin-left:10px;padding:4px 10px;font-size:12px;"><i class="fas fa-copy"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OFFER TAB -->
+    <div id="tab-offer" class="tab">
+        <!-- Status -->
+        <div class="card">
+            <div class="section-title"><div class="section-icon" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2);"><i class="fas fa-tags" style="color:#fbbf24;"></i></div>Current Offer</div>
+            <div class="status-box" id="offer-status">Loading...</div>
+            <button id="offer-remove-btn" onclick="removeOffer()" class="btn btn-danger btn-full" style="display:none;"><i class="fas fa-times-circle"></i> Remove Active Offer</button>
+        </div>
+
+        <!-- Create -->
+        <div class="card">
+            <div class="section-title"><div class="section-icon" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2);"><i class="fas fa-plus" style="color:#34d399;"></i></div>Create New Offer</div>
+
+            <div class="mb"><label class="label">Offer Title</label><input type="text" id="of-title" value="Premium Glory Credit" placeholder="Title"></div>
+            <div class="mb"><label class="label">Description</label><input type="text" id="of-desc" value="Promotional rate for verified India server users." placeholder="Description"></div>
+
+            <div class="row row-3 mb">
+                <div><label class="label">Original Price (₹)</label><input type="number" id="of-orig" value="95" min="1" oninput="updatePreview()"></div>
+                <div><label class="label">Offer Price (₹)</label><input type="number" id="of-price" value="90" min="1" oninput="updatePreview()"></div>
+                <div><label class="label">Timer (hours)</label><input type="number" id="of-hours" value="2" min="1" max="72"></div>
+            </div>
+
+            <div class="mb"><label class="label">Features (one per line)</label>
+                <textarea id="of-features" rows="4">50K–500K Glory boost per day
+Admin approval on payment
+Real-time Telegram alerts
+Refund guarantee on launch failure</textarea>
+            </div>
+
+            <!-- Preview -->
+            <div class="offer-preview mb">
+                <div class="text-xs text-amber mb" style="font-weight:700;letter-spacing:.08em;">PREVIEW</div>
+                <div id="prev-title" style="font-size:17px;font-weight:800;color:#fff;margin-bottom:8px;">Premium Glory Credit</div>
+                <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:4px;">
+                    <span id="prev-price" style="font-size:32px;font-weight:900;color:#fff;">₹90</span>
+                    <span id="prev-orig" style="font-size:18px;color:#6b7280;text-decoration:line-through;margin-bottom:4px;">₹95</span>
+                    <span id="prev-save" style="color:#fbbf24;font-size:13px;margin-left:auto;margin-bottom:6px;">YOU SAVE ₹5</span>
+                </div>
+                <div class="text-xs text-muted">PER CREDIT · ONE-TIME</div>
+            </div>
+
+            <button class="btn btn-amber btn-full" onclick="launchOffer()"><i class="fas fa-rocket"></i> Launch Offer Popup</button>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <button class="bn-btn active" id="bn-dashboard" onclick="showTab('dashboard')"><i class="fas fa-chart-pie"></i>Home</button>
+    <button class="bn-btn" id="bn-glory" onclick="showTab('glory')"><i class="fas fa-trophy"></i>Glory</button>
+    <button class="bn-btn" id="bn-orders" onclick="showTab('orders')"><i class="fas fa-shopping-cart"></i>Orders</button>
+    <button class="bn-btn" id="bn-transactions" onclick="showTab('transactions')"><i class="fas fa-receipt"></i>Payments</button>
+    <button class="bn-btn" id="bn-users" onclick="showTab('users')"><i class="fas fa-users"></i>Users</button>
+    <button class="bn-btn" id="bn-offer" onclick="showTab('offer')"><i class="fas fa-tags"></i>Offer</button>
+</div>
+
+<!-- UPDATE GLORY MODAL -->
+<div class="modal" id="modal-glory">
+    <div class="modal-box">
+        <div class="modal-title">Update Glory<button class="modal-close" onclick="closeModal('modal-glory')">×</button></div>
+        <div class="mb"><div class="label">Group</div><div id="glory-gname" style="font-weight:700;color:#fff;margin-bottom:12px;"></div></div>
+        <div class="mb"><label class="label">Current Glory</label><input type="number" id="glory-current" readonly style="color:#fbbf24;"></div>
+        <div class="mb"><label class="label">New Glory Value</label><input type="number" id="glory-new" placeholder="Enter new glory amount"></div>
+        <button class="btn btn-amber btn-full" onclick="submitGlory()"><i class="fas fa-save"></i> Update Glory</button>
+    </div>
+</div>
+
+<!-- AUTO GLORY MODAL -->
+<div class="modal" id="modal-autoglory">
+    <div class="modal-box">
+        <div class="modal-title">Auto Glory Settings<button class="modal-close" onclick="closeModal('modal-autoglory')">×</button></div>
+        <div class="mb"><div class="label">Group</div><div id="ag-gname" style="font-weight:700;color:#fff;margin-bottom:12px;"></div></div>
+        <div class="mb" style="display:flex;align-items:center;justify-content:space-between;">
+            <label class="label" style="margin:0;">Enable Auto Glory</label>
+            <label class="switch"><input type="checkbox" id="ag-enabled"><span class="slider"></span></label>
+        </div>
+        <div class="mb"><label class="label">Add Glory Every (minutes)</label><input type="number" id="ag-interval" value="5" min="1" max="60"></div>
+        <div class="mb"><label class="label">Glory Amount per interval</label><input type="number" id="ag-amount" value="1000" min="100"></div>
+        <button class="btn btn-success btn-full" onclick="submitAutoGlory()"><i class="fas fa-save"></i> Save Settings</button>
+    </div>
+</div>
+
+<!-- APPROVE MODAL -->
+<div class="modal" id="modal-approve">
+    <div class="modal-box">
+        <div class="modal-title">Approve Order<button class="modal-close" onclick="closeModal('modal-approve')">×</button></div>
+        <div class="mb"><label class="label">Guild Name</label><input type="text" id="ap-guild" placeholder="Guild name"></div>
+        <div class="mb"><label class="label">Leader Name</label><input type="text" id="ap-leader" placeholder="Captain name"></div>
+        <div class="row row-2 mb">
+            <div><label class="label">Bots</label><input type="number" id="ap-bots" value="6"></div>
+            <div><label class="label">Members</label><input type="text" id="ap-members" placeholder="7/25"></div>
+        </div>
+        <div class="row row-3 mb">
+            <div><label class="label">Glory</label><input type="number" id="ap-glory" value="0"></div>
+            <div><label class="label">Level</label><input type="number" id="ap-level" value="1"></div>
+            <div><label class="label">Target</label><input type="number" id="ap-target" value="100000"></div>
+        </div>
+        <button class="btn btn-success btn-full" id="ap-submit-btn" onclick="submitApprove()"><i class="fas fa-check"></i> Approve & Start</button>
+    </div>
+</div>
+
+<!-- EDIT CREDITS MODAL -->
+<div class="modal" id="modal-edit">
+    <div class="modal-box">
+        <div class="modal-title">Edit Credits<button class="modal-close" onclick="closeModal('modal-edit')">×</button></div>
+        <div class="mb"><div class="label">User</div><div id="edit-uname" style="font-weight:700;color:#fff;"></div></div>
+        <div class="mb"><label class="label">Basic Credits</label><input type="number" id="edit-basic"></div>
+        <div class="mb"><label class="label">Premium Credits</label><input type="number" id="edit-premium"></div>
+        <button class="btn btn-primary btn-full" onclick="saveCredits()">Save Changes</button>
+    </div>
+</div>
+
+<!-- SCREENSHOT LIGHTBOX -->
+<div class="modal" id="modal-ss">
+    <div class="modal-box" style="max-width:500px;background:rgba(0,0,0,.95);">
+        <div class="modal-title" style="color:#fff;">Payment Screenshot<button class="modal-close" onclick="closeModal('modal-ss')">×</button></div>
+        <img id="ss-img" src="" style="width:100%;border-radius:12px;margin-bottom:10px;">
+        <div style="text-align:center;"><span id="ss-utr" class="font-mono text-cyan" style="font-size:14px;"></span></div>
+    </div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<script>
+// ===== AUTH =====
+function getToken() { return localStorage.getItem('auth_token') || ''; }
+
+async function authFetch(url, opts = {}) {
+    const token = getToken();
+    const options = { credentials: 'include', ...opts };
+    options.headers = { ...(opts.headers || {}) };
+    if (token) options.headers['Authorization'] = 'Bearer ' + token;
+    const res = await fetch(url, options);
+    if (res.status === 401) { localStorage.removeItem('auth_token'); location.href = '/login'; }
+    return res;
+}
+
+// ===== TOAST =====
+function toast(msg, type = 'info') {
+    const wrap = document.getElementById('toast-wrap');
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.innerHTML = msg;
+    wrap.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+}
+
+// ===== TABS =====
+let currentTab = 'dashboard';
+function showTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const el = document.getElementById('tab-' + tab);
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.bn-btn').forEach(b => b.classList.remove('active'));
+    const bn = document.getElementById('bn-' + tab);
+    if (bn) bn.classList.add('active');
+    currentTab = tab;
+    if (tab === 'dashboard') loadStats();
+    if (tab === 'glory') loadGlory();
+    if (tab === 'orders') loadOrders();
+    if (tab === 'transactions') loadTransactions();
+    if (tab === 'users') loadUsers();
+    if (tab === 'offer') loadOfferStatus();
+}
+
+// ===== MODAL =====
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ===== ESCAPE =====
+function esc(s) { if (!s) return ''; return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ===== STATS =====
+async function loadStats() {
+    try {
+        const res = await authFetch('/api/admin/stats');
+        if (!res.ok) return;
+        const d = await res.json();
+        document.getElementById('s-users').textContent = d.total_users ?? 0;
+        document.getElementById('s-bots').textContent = d.active_groups ?? 0;
+        document.getElementById('s-glory').textContent = (d.total_glory ?? 0).toLocaleString();
+        document.getElementById('s-orders').textContent = d.pending_orders ?? 0;
+        document.getElementById('s-payments').textContent = d.pending_transactions ?? 0;
+    } catch(e) { console.error('stats:', e); }
+}
+
+// ===== ORDERS =====
+let currentOrderId = null;
+async function loadOrders() {
+    try {
+        const res = await authFetch('/api/admin/pending-orders');
+        if (!res.ok) return;
+        const orders = await res.json();
+        const el = document.getElementById('orders-list');
+        if (!orders.length) { el.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i>No pending orders</div>'; return; }
+        const regionNames = {bd:'Bangladesh',in:'India',indo:'Indonesia',br:'Brazil',me:'Middle East',ghrab:'MENA'};
+        el.innerHTML = orders.map(o => `
+            <div style="background:#151821;border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:14px;margin-bottom:10px;">
+                <div style="font-weight:700;color:#fff;margin-bottom:4px;"><i class="fas fa-flag" style="color:#fbbf24;margin-right:6px;"></i>${esc(o.clan_id)}</div>
+                <div class="text-sm text-muted">${esc(o.email)} · ${regionNames[o.region]||o.region} · ${o.region_tier==='premium'?'Premium':'Basic'}</div>
+                <div class="text-xs text-muted" style="margin-top:4px;">${new Date(o.created_at).toLocaleString()}</div>
+                <div style="margin-top:10px;display:flex;gap:8px;">
+                    <button class="btn btn-success" style="padding:6px 14px;font-size:12px;" onclick="openApprove(${o.id})"><i class="fas fa-check"></i> Approve</button>
+                    <button class="btn btn-danger" style="padding:6px 14px;font-size:12px;" onclick="rejectOrder(${o.id})"><i class="fas fa-times"></i> Reject</button>
+                </div>
+            </div>`).join('');
+    } catch(e) { console.error('orders:', e); }
+}
+
+function openApprove(id) {
+    currentOrderId = id;
+    ['ap-guild','ap-leader','ap-members'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('ap-bots').value = 6;
+    document.getElementById('ap-glory').value = 0;
+    document.getElementById('ap-level').value = 1;
+    document.getElementById('ap-target').value = 100000;
+    openModal('modal-approve');
+}
+
+async function submitApprove() {
+    if (!currentOrderId) return;
+    const btn = document.getElementById('ap-submit-btn');
+    btn.disabled = true; btn.textContent = 'Processing...';
+    try {
+        const res = await authFetch('/api/admin/approve-order', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+                order_id: currentOrderId,
+                guild_name: document.getElementById('ap-guild').value,
+                leader_name: document.getElementById('ap-leader').value,
+                bot_count: parseInt(document.getElementById('ap-bots').value)||6,
+                members: document.getElementById('ap-members').value||'0/20',
+                glory: parseInt(document.getElementById('ap-glory').value)||0,
+                level: parseInt(document.getElementById('ap-level').value)||1,
+                target_glory: parseInt(document.getElementById('ap-target').value)||100000
+            })
+        });
+        const d = await res.json();
+        if (d.success) { toast('✅ Order approved!','success'); closeModal('modal-approve'); loadOrders(); loadStats(); }
+        else { toast(d.error||'Failed','error'); }
+    } catch(e) { toast('Network error','error'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Approve & Start'; }
+}
+
+async function rejectOrder(id) {
+    if (!confirm('Reject this order?')) return;
+    const res = await authFetch('/api/admin/reject-order', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_id:id})});
+    const d = await res.json();
+    if (d.success) { toast('Order rejected','info'); loadOrders(); loadStats(); }
+    else toast(d.error||'Failed','error');
+}
+
+// ===== TRANSACTIONS =====
+let txData = {};
+async function loadTransactions() {
+    try {
+        const res = await authFetch('/api/admin/transactions');
+        if (!res.ok) return;
+        const txs = await res.json();
+        txData = {};
+        txs.forEach(t => txData[t.id] = t);
+        const tbody = document.getElementById('tx-list');
+        if (!txs.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">No transactions</td></tr>'; return; }
+        tbody.innerHTML = txs.map(t => `<tr>
+            <td class="text-muted">#${t.id}</td>
+            <td style="font-weight:600;color:#fff;">${esc(t.username)}</td>
+            <td class="text-green font-bold">₹${(t.amount||0).toFixed(0)}</td>
+            <td>${t.basic_credits>0?`<span class="text-blue text-xs">${t.basic_credits}B</span>`:''}${t.premium_credits>0?`<span class="text-amber text-xs"> ${t.premium_credits}P</span>`:''}</td>
+            <td><span class="font-mono text-xs ${t.utr_id?'text-cyan':''}">${t.utr_id?esc(t.utr_id):'N/A'}</span></td>
+            <td>${t.screenshot_data?`<img class="thumb" src="${t.screenshot_data}" onclick="viewSS(${t.id})">`:'<span class="text-muted text-xs">None</span>'}</td>
+            <td><span class="chip ${t.status==='pending'?'chip-yellow':t.status==='completed'?'chip-green':'chip-red'}">${t.status}</span></td>
+            <td>${t.status==='pending'?`
+                <button class="btn btn-success" style="padding:4px 10px;font-size:11px;margin-bottom:4px;" onclick="approveTx(${t.id})">✓ Accept</button>
+                <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="rejectTx(${t.id})">✗ Reject</button>
+            `:`<span class="text-xs text-muted">${t.status==='completed'?'✅ Done':'❌ Rejected'}</span>`}</td>
+        </tr>`).join('');
+    } catch(e) { console.error('tx:', e); }
+}
+
+function viewSS(id) {
+    const t = txData[id]; if (!t) return;
+    document.getElementById('ss-img').src = t.screenshot_data;
+    document.getElementById('ss-utr').textContent = 'UTR: ' + (t.utr_id||'N/A');
+    openModal('modal-ss');
+}
+
+async function approveTx(id) {
+    const res = await authFetch('/api/admin/transaction/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transaction_id:id})});
+    const d = await res.json();
+    if (d.success) { toast('✅ Approved & credits added','success'); loadTransactions(); loadStats(); }
+    else toast(d.error||'Failed','error');
+}
+
+async function rejectTx(id) {
+    const res = await authFetch('/api/admin/transaction/reject',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transaction_id:id})});
+    const d = await res.json();
+    if (d.success) { toast('Transaction rejected','info'); loadTransactions(); }
+    else toast(d.error||'Failed','error');
+}
+
+// ===== USERS =====
+let editUserId = null;
+async function loadUsers() {
+    try {
+        const res = await authFetch('/api/admin/users');
+        if (!res.ok) return;
+        const users = await res.json();
+        document.getElementById('users-list').innerHTML = users.map(u => `<tr>
+            <td class="text-muted">${u.id}</td>
+            <td style="font-weight:600;color:#fff;">${esc(u.username)}</td>
+            <td class="text-blue">${u.basic_credits}</td>
+            <td class="text-amber">${u.premium_credits}</td>
+            <td><span class="chip ${u.role==='admin'?'chip-yellow':'chip-blue'}">${u.role}</span></td>
+            <td><button class="btn btn-primary" style="padding:4px 10px;font-size:11px;" onclick="openEdit(${u.id},'${esc(u.username)}',${u.basic_credits},${u.premium_credits})"><i class="fas fa-edit"></i></button></td>
+        </tr>`).join('');
+    } catch(e) { console.error('users:', e); }
+}
+
+function openEdit(id, name, basic, premium) {
+    editUserId = id;
+    document.getElementById('edit-uname').textContent = name;
+    document.getElementById('edit-basic').value = basic;
+    document.getElementById('edit-premium').value = premium;
+    openModal('modal-edit');
+}
+
+async function saveCredits() {
+    const res = await authFetch('/api/admin/update-credits',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({user_id:editUserId,basic_credits:parseInt(document.getElementById('edit-basic').value)||0,premium_credits:parseInt(document.getElementById('edit-premium').value)||0})});
+    const d = await res.json();
+    if (d.success) { toast('Credits updated!','success'); closeModal('modal-edit'); loadUsers(); }
+    else toast(d.error||'Failed','error');
+}
+
+// ===== COUPON =====
+async function genCoupon() {
+    const basic = parseInt(document.getElementById('cp-basic').value)||0;
+    const premium = parseInt(document.getElementById('cp-premium').value)||0;
+    if (!basic && !premium) { toast('Select at least 1 credit','error'); return; }
+    const res = await authFetch('/api/admin/create-coupon',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({basic_credits:basic,premium_credits:premium})});
+    const d = await res.json();
+    if (d.success) {
+        document.getElementById('coupon-code').textContent = d.coupon.code;
+        document.getElementById('coupon-result').style.display = 'block';
+        toast('Coupon generated!','success');
+    } else toast(d.error||'Failed','error');
+}
+
+// ===== OFFER =====
+function updatePreview() {
+    const orig = parseInt(document.getElementById('of-orig').value)||95;
+    const price = parseInt(document.getElementById('of-price').value)||90;
+    document.getElementById('prev-title').textContent = document.getElementById('of-title').value;
+    document.getElementById('prev-price').textContent = '₹'+price;
+    document.getElementById('prev-orig').textContent = '₹'+orig;
+    document.getElementById('prev-save').textContent = 'YOU SAVE ₹'+(orig-price);
+}
+
+async function loadOfferStatus() {
+    try {
+        const res = await fetch('/api/public/offer');
+        const d = await res.json();
+        const box = document.getElementById('offer-status');
+        const removeBtn = document.getElementById('offer-remove-btn');
+        if (d.offer && d.offer.is_active) {
+            const o = d.offer;
+            box.style.borderColor = 'rgba(34,197,94,.4)';
+            box.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;"><span style="width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 1.5s infinite;display:inline-block;"></span><span style="color:#22c55e;font-weight:700;">OFFER ACTIVE</span></div>
+            <div style="font-weight:800;color:#fff;font-size:16px;">${esc(o.title)}</div>
+            <div style="margin:8px 0;"><span style="font-size:24px;font-weight:900;color:#fbbf24;">₹${o.offer_price}</span> <span style="color:#6b7280;text-decoration:line-through;">₹${o.original_price}</span></div>
+            <div class="text-xs text-muted">Timer: ${o.duration_hours}h | Save ₹${o.original_price-o.offer_price}</div>`;
+            removeBtn.style.display = 'flex';
+        } else {
+            box.style.borderColor = '#2a2e40';
+            box.innerHTML = '<span style="color:#6b7280;">No active offer</span>';
+            removeBtn.style.display = 'none';
+        }
+    } catch(e) { console.error('offer status:', e); }
+}
+
+async function launchOffer() {
+    const orig = parseInt(document.getElementById('of-orig').value);
+    const price = parseInt(document.getElementById('of-price').value);
+    const hours = parseInt(document.getElementById('of-hours').value);
+    if (!price || !hours) { toast('Fill all fields','error'); return; }
+    if (price >= orig) { toast('Offer price must be less than original','error'); return; }
+    const features = document.getElementById('of-features').value.split('\n').map(f=>f.trim()).filter(f=>f);
+    const res = await authFetch('/api/admin/offer/create',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({title:document.getElementById('of-title').value,description:document.getElementById('of-desc').value,original_price:orig,offer_price:price,duration_hours:hours,features})});
+    const d = await res.json();
+    if (d.success) { toast('✅ Offer launched!','success'); loadOfferStatus(); }
+    else toast(d.error||'Failed','error');
+}
+
+async function removeOffer() {
+    if (!confirm('Remove active offer?')) return;
+    const res = await authFetch('/api/admin/offer/deactivate',{method:'POST'});
+    const d = await res.json();
+    if (d.success) { toast('Offer removed','info'); loadOfferStatus(); }
+    else toast(d.error||'Failed','error');
+}
+
+// ===== GLORY =====
+let gloryGroups = {};
+async function loadGlory() {
+    try {
+        const res = await authFetch('/api/admin/active-groups');
+        if (!res.ok) return;
+        const groups = await res.json();
+        gloryGroups = {};
+        groups.forEach(g => gloryGroups[g.id] = g);
+        const el = document.getElementById('glory-list');
+        if (!groups.length) { el.innerHTML = '<div class="empty"><i class="fas fa-robot"></i>No active bot instances</div>'; return; }
+        el.innerHTML = groups.map(g => {
+            const pct = g.target_glory > 0 ? Math.min(100, Math.round(g.glory_earned/g.target_glory*100)) : 0;
+            return `<div style="background:#151821;border:1px solid rgba(245,158,11,.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                    <div>
+                        <div style="font-weight:700;color:#fff;">${esc(g.guild_name||'Unknown Guild')}</div>
+                        <div class="text-xs text-muted">${esc(g.clan_id)} · ${esc(g.username)} · ${g.region}</div>
+                    </div>
+                    <span class="chip chip-green" style="font-size:10px;">RUNNING</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                    <div style="flex:1;background:#1e2130;border-radius:6px;height:6px;overflow:hidden;">
+                        <div style="width:${pct}%;background:#f59e0b;height:100%;border-radius:6px;"></div>
+                    </div>
+                    <span class="text-amber text-xs font-bold">${pct}%</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                    <span class="text-xs text-muted">Glory: <span class="text-amber font-bold">${(g.glory_earned||0).toLocaleString()}</span></span>
+                    <span class="text-xs text-muted">Target: <span class="text-white">${(g.target_glory||0).toLocaleString()}</span></span>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-amber" style="padding:5px 12px;font-size:11px;flex:1;" onclick="openGloryModal(${g.id})"><i class="fas fa-edit"></i> Update Glory</button>
+                    <button class="btn ${g.auto_glory_enabled?'btn-success':'btn-warning'}" style="padding:5px 12px;font-size:11px;flex:1;" onclick="openAutoGloryModal(${g.id})">
+                        <i class="fas fa-magic"></i> Auto: ${g.auto_glory_enabled?'ON':'OFF'}
+                    </button>
+                </div>
+                ${g.started_at ? `<div class="text-xs text-muted" style="margin-top:6px;">Started: ${new Date(g.started_at).toLocaleString()}</div>` : ''}
+            </div>`;
+        }).join('');
+    } catch(e) { console.error('glory:', e); }
+}
+
+let currentGloryGroupId = null;
+function openGloryModal(id) {
+    const g = gloryGroups[id]; if (!g) return;
+    currentGloryGroupId = id;
+    document.getElementById('glory-gname').textContent = (g.guild_name||'Unknown') + ' · ' + g.clan_id;
+    document.getElementById('glory-current').value = g.glory_earned||0;
+    document.getElementById('glory-new').value = g.glory_earned||0;
+    openModal('modal-glory');
+}
+
+async function submitGlory() {
+    const newVal = parseInt(document.getElementById('glory-new').value)||0;
+    const res = await authFetch('/api/admin/update-group-glory',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({group_id:currentGloryGroupId,new_glory:newVal})});
+    const d = await res.json();
+    if (d.success) { toast('✅ Glory updated!','success'); closeModal('modal-glory'); loadGlory(); }
+    else toast(d.error||'Failed','error');
+}
+
+let currentAutoGloryGroupId = null;
+function openAutoGloryModal(id) {
+    const g = gloryGroups[id]; if (!g) return;
+    currentAutoGloryGroupId = id;
+    document.getElementById('ag-gname').textContent = (g.guild_name||'Unknown') + ' · ' + g.clan_id;
+    document.getElementById('ag-enabled').checked = g.auto_glory_enabled||false;
+    document.getElementById('ag-interval').value = g.auto_glory_interval||5;
+    document.getElementById('ag-amount').value = g.auto_glory_amount||1000;
+    openModal('modal-autoglory');
+}
+
+async function submitAutoGlory() {
+    const res = await authFetch('/api/admin/update-group-auto-glory',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+            group_id: currentAutoGloryGroupId,
+            enabled: document.getElementById('ag-enabled').checked,
+            interval: parseInt(document.getElementById('ag-interval').value)||5,
+            amount: parseInt(document.getElementById('ag-amount').value)||1000
+        })});
+    const d = await res.json();
+    if (d.success) { toast('✅ Auto glory settings saved!','success'); closeModal('modal-autoglory'); loadGlory(); }
+    else toast(d.error||'Failed','error');
+}
+
+// ===== INIT =====
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    await authFetch('/api/auth/logout',{method:'POST'});
+    localStorage.removeItem('auth_token');
+    location.href = '/login';
+});
+
+async function init() {
+    const token = getToken();
+    if (!token) { location.href = '/login'; return; }
+    try {
+        const res = await authFetch('/api/auth/me');
+        if (!res || !res.ok) { location.href = '/login'; return; }
+        const user = await res.json();
+        if (user.role !== 'admin') { location.href = '/home'; return; }
+        document.getElementById('admin-name').textContent = user.username;
+        document.getElementById('admin-badge').style.display = 'flex';
+    } catch(e) { location.href = '/login'; return; }
+    loadStats();
+}
+
+init();
+</script>
+</body>
+</html>
